@@ -1,8 +1,11 @@
 ChatSaver = LibStub('AceAddon-3.0'):NewAddon('ChatSaver','AceHook-3.0','AceEvent-3.0');
 local core = ChatSaver;
 
+local db;
+
 function core:OnInitialize()
 	self:RegisterEvent('PLAYER_LOGIN','ReloadUI');
+	self:Hook(SlashCmdList,'JOIN','JoinChannel',true);
 end
 
 function core:ReloadUI()
@@ -22,14 +25,20 @@ function core:ReloadUI()
 	myChannels[5] = 'ncabads';
 	myChannels[6] = 'ncafail';
 	
-	--debugging
 	for index,channel in pairs(myChannels) do
 		if(channel ~= channelList[index]) then 
 			print('Channel ',channel,' not joined.  Rejoining now!');
 			JoinPermanentChannel(channel);
+			
+			local i = 1;
+			while ( DEFAULT_CHAT_FRAME.channelList[i] ) do
+				i = i + 1;
+			end
+			DEFAULT_CHAT_FRAME.channelList[i] = channel;
 		end
 	end
 end
 
---AddChatWindowChannel(chatFrameIndex, "channel") - Make a chat channel visible in a specific ChatFrame.
---Chat output architecture has changed since release; calling this function alone is no longer sufficient to add a channel to a particular frame in the default UI. Use ChatFrame_AddChannel(chatFrame, "channelName") instead, like so:
+function core:JoinChannel()
+	--need to store channel in db
+end
