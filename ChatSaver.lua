@@ -13,8 +13,8 @@ function core:ReloadUI()
 		channelList[index] = channel;
 	end
 	
+	--force channel list for now
 	myChannels = {};
-	
 	myChannels[1] = 'General';
 	myChannels[2] = 'Trade';
 	myChannels[3] = 'LocalDefense';
@@ -22,6 +22,7 @@ function core:ReloadUI()
 	myChannels[5] = 'ncabads';
 	myChannels[6] = 'ncafail';
 	
+	--debugging
 	for index,channel in pairs(myChannels) do
 		if(channel ~= channelList[index]) then 
 			print('Channel ',channel,' not joined.  Rejoining now!');
