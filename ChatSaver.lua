@@ -39,7 +39,6 @@ function core:RejoinChannels(event,message,...)
 		end
 		
 		if(found == false) then
-			print('Chat Saver: Restoring lost channel, ',channel);
 			JoinPermanentChannel(channel);
 			for index,shown in pairs(ChatSaverDB[channel].frames) do
 				if(shown) then
@@ -55,10 +54,12 @@ function core:JoinChannel(msg)
 	
 	local name = gsub(msg, "%s*([^%s]+).*", "%1");
 
-	ChatSaverDB[name] = {};
-	ChatSaverDB[name]['frames'] = {};
-	ChatSaverDB[name]['index'] = GetChannelName(name);
-	ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
+	if(strlen(name) > 0 and string.match(name,"%a+")) then
+		ChatSaverDB[name] = {};
+		ChatSaverDB[name]['frames'] = {};
+		ChatSaverDB[name]['index'] = GetChannelName(name);
+		ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
+	end
 end
 
 function core:LeaveChannel(msg)
