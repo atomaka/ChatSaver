@@ -4,8 +4,8 @@ local core = ChatSaver;
 local db;
 
 function core:OnInitialize()
-	self:Hook(SlashCmdList,'JOIN','JoinChannel',true);
-	self:Hook(SlashCmdList,'LEAVE','LeaveChannel',true);
+	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
+	self:RawHook(SlashCmdList,'LEAVE','JoinChannel',true);
 	
 	self:RegisterChatCommand('cs','SlashCommand');
 	
@@ -31,7 +31,7 @@ function core:RejoinChannels(event,message,...)
 		channelList[index] = channel;
 	end
 	
-	for index,channel in pairs(ChatSaverDB) do
+	for channel,information in pairs(ChatSaverDB) do
 		local found = false;
 		for jIndex,jChannel in pairs(channelList) do
 			if(jChannel == channel) then 
@@ -46,27 +46,22 @@ function core:RejoinChannels(event,message,...)
 	end
 end
 
-function core:InChannels()
-
-end
-
 function core:JoinChannel(msg)
+	self.hooks[SlashCmdList].JOIN(msg);
+	
 	local name = gsub(msg, "%s*([^%s]+).*", "%1");
-	--need to store channel in db
-	local channelCount = table.getn(ChatSaverDB);
-	ChatSaverDB[channelCount + 1] = name;
+
+	ChatSaverDB[name] = {};
+	ChatSaverDB[name]['frames'] = {};
+	ChatSaverDB[name]['index'] = GetChannelName(name);
+	ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
 end
 
 function core:LeaveChannel(msg)
+	self.hooks[SlashCmdList].LEAVE(msg);
+	
 	local number = gsub(msg, "%s*([^%s]+).*", "%1");
 	local _,name = GetChannelName(number);
-
-	pos = 9;
-	for index,channel in pairs(ChatSaverDB) do
-		if(channel == name) then
-			pos = index;
-		end
-	end
 	
-	table.remove(ChatSaverDB,pos);
+	ChatSaverDB[name] = nil;
 end
