@@ -5,7 +5,8 @@ local db;
 
 function core:OnInitialize()
 	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
-	self:RawHook(SlashCmdList,'LEAVE','JoinChannel',true);
+	self:RawHook(SlashCmdList,'LEAVE','LeaveChannel',true);
+	self:Hook('ToggleChatChannel','ToggleChatChannel',true);
 	
 	self:RegisterChatCommand('cs','SlashCommand');
 	
@@ -41,7 +42,9 @@ function core:RejoinChannels(event,message,...)
 		
 		if(found == false) then
 			JoinPermanentChannel(channel);
-			DEFAULT_CHAT_FRAME.channelList[table.getn(DEFAULT_CHAT_FRAME.channelList) + 1] = channel;
+			for index,shown in pairs(ChatSaverDB[channel].frames) do
+				_G['ChatFrame'..index].channelList[table.getn(_G['ChatFrame'..index].channelList) + 1] = channel;
+			end
 		end
 	end
 end
@@ -63,5 +66,13 @@ function core:LeaveChannel(msg)
 	local number = gsub(msg, "%s*([^%s]+).*", "%1");
 	local _,name = GetChannelName(number);
 	
-	ChatSaverDB[name] = nil;
+	--ChatSaverDB[name] = nil;
+end
+
+function core:ToggleChatChannel(checked,channel)
+	if(checked) then
+		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = true;
+	else
+		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = false;
+	end
 end
