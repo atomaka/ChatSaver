@@ -43,7 +43,9 @@ function core:RejoinChannels(event,message,...)
 		if(found == false) then
 			JoinPermanentChannel(channel);
 			for index,shown in pairs(ChatSaverDB[channel].frames) do
-				_G['ChatFrame'..index].channelList[table.getn(_G['ChatFrame'..index].channelList) + 1] = channel;
+				if(shown) then
+					_G['ChatFrame'..index].channelList[table.getn(_G['ChatFrame'..index].channelList) + 1] = channel;
+				end
 			end
 		end
 	end
@@ -66,10 +68,11 @@ function core:LeaveChannel(msg)
 	local number = gsub(msg, "%s*([^%s]+).*", "%1");
 	local _,name = GetChannelName(number);
 	
-	--ChatSaverDB[name] = nil;
+	ChatSaverDB[name] = nil;
 end
 
 function core:ToggleChatChannel(checked,channel)
+	if(ChatSaverDB[channel] == nil) then return end;
 	if(checked) then
 		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = true;
 	else
