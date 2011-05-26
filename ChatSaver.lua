@@ -1,6 +1,8 @@
 ChatSaver = LibStub('AceAddon-3.0'):NewAddon('ChatSaver','AceConsole-3.0','AceHook-3.0','AceEvent-3.0');
 local core = ChatSaver;
 
+core.verified = false;
+
 function core:OnInitialize()
 	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
 	self:RawHook(SlashCmdList,'LEAVE','LeaveChannel',true);
@@ -16,14 +18,15 @@ function core:OnEnable()
 end
 
 function core:SlashCommand()
+	core.verified = false
 	core:RejoinChannels();
 end
 
 function core:RejoinChannels(event,message,...)
-	if(message == 'YOU_LEFT') then
+	if(message == 'YOU_LEFT' or core.verified == true) then
 		return;
 	end
-
+	
 	local channelList = {};
 	for i = 1, select("#",GetChannelList()), 2 do
 		local index,channel = select(i,GetChannelList());
@@ -47,6 +50,8 @@ function core:RejoinChannels(event,message,...)
 			end
 		end
 	end
+	
+	core.verified = true;
 end
 
 function core:JoinChannel(msg)
