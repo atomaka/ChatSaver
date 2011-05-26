@@ -1,8 +1,6 @@
 ChatSaver = LibStub('AceAddon-3.0'):NewAddon('ChatSaver','AceConsole-3.0','AceHook-3.0','AceEvent-3.0');
 local core = ChatSaver;
 
-local db;
-
 function core:OnInitialize()
 	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
 	self:RawHook(SlashCmdList,'LEAVE','LeaveChannel',true);
@@ -41,6 +39,7 @@ function core:RejoinChannels(event,message,...)
 		end
 		
 		if(found == false) then
+			print('Chat Saver: Restoring lost channel, ',channel);
 			JoinPermanentChannel(channel);
 			for index,shown in pairs(ChatSaverDB[channel].frames) do
 				if(shown) then
@@ -72,7 +71,10 @@ function core:LeaveChannel(msg)
 end
 
 function core:ToggleChatChannel(checked,channel)
-	if(ChatSaverDB[channel] == nil) then return end;
+	if(ChatSaverDB[channel] == nil) then 
+		return;
+	end
+	
 	if(checked) then
 		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = true;
 	else
