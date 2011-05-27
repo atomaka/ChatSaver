@@ -17,26 +17,10 @@ function core:OnInitialize()
 end
 
 function core:OnEnable()
-	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','RejoinChannels');
-	
-	--store curret channels if this is our first run
+	self:RegisterEvent('CHANNEL_UI_UPDATE','RejoinChannels');
+
 	if(core.firstrun) then
-		for frame = 1,10 do 
-			local frameChannels = { GetChatWindowChannels(frame) };
-			for i = 1,#frameChannels,2 do
-				local name,zone = frameChannels[i], frameChannels[i+1]
-				
-				if(zone == 0) then
-					if(ChatSaverDB[name] == nil) then
-						ChatSaverDB[name] = {};
-						ChatSaverDB[name]['frames'] = {};
-						ChatSaverDB[name]['index'] = GetChannelName(name);
-					end
-				
-					ChatSaverDB[name]['frames'][frame] = true;
-				end
-			end
-		end
+		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','SetupChatSaver');
 	end
 end
 
@@ -44,7 +28,7 @@ function core:SlashCommand()
 	core:RejoinChannels();
 end
 
-function core:RejoinChannels(event,message,...)
+function core:RejoinChannels(...)
 	local currentChannels = { GetChannelList() };
 	
 	for channel,information in pairs(ChatSaverDB) do
@@ -54,6 +38,27 @@ function core:RejoinChannels(event,message,...)
 				if(shown) then
 					ChatFrame_AddChannel(_G['ChatFrame'..index],channel);
 				end
+			end
+		end
+	end
+	
+	self:UnregisterEvent('CHANNEL_UI_UPDATE');
+end
+
+function core:SetupChatSaver(...)	
+	for frame = 1,10 do 
+		local frameChannels = { GetChatWindowChannels(frame) };
+		for i = 1,#frameChannels,2 do
+			local name,zone = frameChannels[i], frameChannels[i+1]
+			
+			if(zone == 0) then
+				if(ChatSaverDB[name] == nil) then
+					ChatSaverDB[name] = {};
+					ChatSaverDB[name]['frames'] = {};
+					ChatSaverDB[name]['index'] = GetChannelName(name);
+				end
+			
+				ChatSaverDB[name]['frames'][frame] = true;
 			end
 		end
 	end
@@ -80,7 +85,7 @@ function core:LeaveChannel(msg)
 	local number = gsub(msg, "%s*([^%s]+).*", "%1");
 	local _,name = GetChannelName(number);
 	
-	--ChatSaverDB[name] = nil;
+	ChatSaverDB[name] = nil;
 end
 
 function core:ToggleChatChannel(checked,channel)
