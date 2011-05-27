@@ -27,21 +27,14 @@ function core:RejoinChannels(event,message,...)
 		return;
 	end
 	
-	local channelList = {};
-	for i = 1, select("#",GetChannelList()), 2 do
+	local currentChannels = {};
+	for i = 1,select("#",GetChannelList()),2 do
 		local index,channel = select(i,GetChannelList());
-		channelList[index] = channel;
+		currentChannels[channel] = true;
 	end
 	
 	for channel,information in pairs(ChatSaverDB) do
-		local found = false;
-		for jIndex,jChannel in pairs(channelList) do
-			if(jChannel == channel) then 
-				found = true;
-			end
-		end
-		
-		if(found == false) then
+		if(currentChannels[channel] == nil) then
 			JoinPermanentChannel(channel);
 			for index,shown in pairs(ChatSaverDB[channel].frames) do
 				if(shown) then
