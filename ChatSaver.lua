@@ -29,7 +29,10 @@ function core:SlashCommand()
 end
 
 function core:RejoinChannels(...)
-	local currentChannels = { GetChannelList() };
+	local currentChannels = {};
+	for i = 1,select("#",GetChannelList()) do
+		currentChannels[select(i,GetChannelList())] = true
+	end
 	
 	for channel,information in pairs(ChatSaverDB) do
 		if(currentChannels[channel] == nil) then
