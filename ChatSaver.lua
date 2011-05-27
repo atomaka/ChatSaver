@@ -23,7 +23,7 @@ function core:SlashCommand()
 end
 
 function core:RejoinChannels(event,message,...)
-	if(message == 'YOU_LEFT' or core.verified == true) then
+	if(core.verified == true) then
 		return;
 	end
 	
@@ -66,7 +66,7 @@ function core:LeaveChannel(msg)
 	local number = gsub(msg, "%s*([^%s]+).*", "%1");
 	local _,name = GetChannelName(number);
 	
-	ChatSaverDB[name] = nil;
+	--ChatSaverDB[name] = nil;
 end
 
 function core:ToggleChatChannel(checked,channel)
