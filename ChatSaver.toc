@@ -1,17 +1,15 @@
-## Interface: 40000
+## Interface: 40100
 ## Title: ChatSaver
-## Version: 1.0
+## Version: @project-version@
 ## Author: Gaffer
 ## Notes: Saves chat channels and restores them if World of Warcraft loses them.
-## Dependencies: 
-## OptionalDeps: 
 ## DefaultState: enabled 
 ## SavedVariablesPerCharacter: ChatSaverDB
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
 Libs\AceAddon-3.0\AceAddon-3.0.xml
-Libs\AceAddon-3.0\AceConsole-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceEvent-3.0\AceEvent-3.0.xml
 Libs\AceHook-3.0\AceHook-3.0.xml
 
