@@ -34,13 +34,11 @@ function core:RejoinChannels(...)
 		currentChannels[select(i,GetChannelList())] = true
 	end
 	
-	for channel,information in pairs(ChatSaverDB) do
+	for channel,_ in pairs(ChatSaverDB) do
 		if(currentChannels[channel] == nil) then
 			JoinPermanentChannel(channel);
-			for index,shown in pairs(ChatSaverDB[channel].frames) do
-				if(shown) then
-					ChatFrame_AddChannel(_G['ChatFrame'..index],channel);
-				end
+			for index,_ in pairs(ChatSaverDB[channel].frames) do
+				ChatFrame_AddChannel(_G['ChatFrame'..index],channel);
 			end
 		end
 	end
@@ -99,6 +97,6 @@ function core:ToggleChatChannel(checked,channel)
 	if(checked) then
 		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = true;
 	else
-		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = false;
+		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = nil;
 	end
 end
