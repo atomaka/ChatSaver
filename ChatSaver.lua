@@ -46,9 +46,8 @@ function core:RejoinChannels(...)
 end
 
 function core:SetupChatSaver(...)
-	local chatWindowChannels = { GetChatWindowChannels(frame) };
-
 	for frame = 1,NUM_CHAT_WINDOWS do 
+		local chatWindowChannels = { GetChatWindowChannels(frame) };
 		for i = 1,#chatWindowChannels,2 do
 			local name,zone = chatWindowChannels[i], chatWindowChannels[i + 1];
 			
