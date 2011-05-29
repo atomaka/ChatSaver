@@ -2,10 +2,6 @@ ChatSaver = LibStub('AceAddon-3.0'):NewAddon('ChatSaver','AceConsole-3.0','AceHo
 local core = ChatSaver;
 
 function core:OnInitialize()	
-	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
-	self:RawHook(SlashCmdList,'LEAVE','LeaveChannel',true);
-	self:Hook('ToggleChatChannel','ToggleChatChannel',true);
-	
 	self:RegisterChatCommand('cs','SlashCommand');
 	
 	if(ChatSaverDB == nil) then 
@@ -17,8 +13,11 @@ function core:OnInitialize()
 end
 
 function core:OnEnable()
+	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
+	self:RawHook(SlashCmdList,'LEAVE','LeaveChannel',true);
+	self:Hook('ToggleChatChannel','ToggleChatChannel',true);
+	
 	self:RegisterEvent('CHANNEL_UI_UPDATE','RejoinChannels');
-
 	if(core.firstrun) then
 		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','SetupChatSaver');
 	end
@@ -30,13 +29,13 @@ end
 
 function core:RejoinChannels(...)
 	local currentChannels = {};
-	for i = 1,select("#",GetChannelList()) do
+	for i = 1,select('#',GetChannelList()) do
 		currentChannels[select(i,GetChannelList())] = true
 	end
 	
 	for channel,_ in pairs(ChatSaverDB) do
 		if(currentChannels[channel] == nil) then
-			JoinPermanentChannel(channel);
+			JoinPermanentChannel(channel); -- does not place in chat frame properly
 			for index,_ in pairs(ChatSaverDB[channel].frames) do
 				ChatFrame_AddChannel(_G['ChatFrame'..index],channel);
 			end
@@ -46,11 +45,12 @@ function core:RejoinChannels(...)
 	self:UnregisterEvent('CHANNEL_UI_UPDATE');
 end
 
-function core:SetupChatSaver(...)	
-	for frame = 1,10 do 
-		local frameChannels = { GetChatWindowChannels(frame) };
-		for i = 1,#frameChannels,2 do
-			local name,zone = frameChannels[i], frameChannels[i+1]
+function core:SetupChatSaver(...)
+	local chatWindowChannels = { GetChatWindowChannels(frame) };
+
+	for frame = 1,NUM_CHAT_WINDOWS do 
+		for i = 1,#chatWindowChannels,2 do
+			local name,zone = chatWindowChannels[i], chatWindowChannels[i + 1];
 			
 			if(zone == 0) then
 				if(ChatSaverDB[name] == nil) then
