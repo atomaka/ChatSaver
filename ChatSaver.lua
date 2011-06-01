@@ -13,14 +13,10 @@ function core:OnInitialize()
 end
 
 function core:OnEnable()
-	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
-	self:RawHook(SlashCmdList,'LEAVE','LeaveChannel',true);
 	self:Hook('ToggleChatChannel','ToggleChatChannel',true);
 	
 	self:RegisterEvent('CHANNEL_UI_UPDATE','RejoinChannels');
-	if(core.firstrun) then
-		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','SetupChatSaver');
-	end
+	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','ProcessChannelChanges');
 end
 
 function core:SlashCommand()
@@ -28,6 +24,10 @@ function core:SlashCommand()
 end
 
 function core:RejoinChannels(...)
+	if(core.firstrun) then
+		core:SetupChatSaver();
+	end
+	
 	local currentChannels = {};
 	for i = 1,select('#',GetChannelList()) do
 		currentChannels[select(i,GetChannelList())] = true
@@ -45,7 +45,7 @@ function core:RejoinChannels(...)
 	self:UnregisterEvent('CHANNEL_UI_UPDATE');
 end
 
-function core:SetupChatSaver(...)
+function core:SetupChatSaver()
 	for frame = 1,NUM_CHAT_WINDOWS do 
 		local chatWindowChannels = { GetChatWindowChannels(frame) };
 		for i = 1,#chatWindowChannels,2 do
@@ -62,30 +62,31 @@ function core:SetupChatSaver(...)
 			end
 		end
 	end
-	
-	self:UnregisterEvent('CHAT_MSG_CHANNEL_NOTICE');
 end
 
-function core:JoinChannel(msg)
-	self.hooks[SlashCmdList].JOIN(msg);
-	
-	local name = gsub(msg, "%s*([^%s]+).*", "%1");
+function core:ProcessChannelChanges(_,message,_,_,_,_,_,_,index,name,...)
+	if(message == 'YOU_JOINED') then
+		local zone = 1;
+		for frame = 1,NUM_CHAT_WINDOWS do 
+			local chatWindowChannels = { GetChatWindowChannels(frame) };
+			for i = 1,#chatWindowChannels,2 do
+				if(chatWindowChannels[i] == name) then
+					print(chatWindowChannels[i],chatWindowChannels[i + 1]);
+					zone = chatWindowChannels[i + 1];
+					break;
+				end				
+			end
+		end
 
-	if(strlen(name) > 0 and string.match(name,"%a+")) then
-		ChatSaverDB[name] = {};
-		ChatSaverDB[name]['frames'] = {};
-		ChatSaverDB[name]['index'] = GetChannelName(name);
-		ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
+		if(zone == 0) then
+			ChatSaverDB[name] = {};
+			ChatSaverDB[name]['frames'] = {};
+			ChatSaverDB[name]['index'] = index;
+			ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
+		end
+	elseif(message == 'YOU_LEFT') then
+		ChatSaverDB[name] = nil;
 	end
-end
-
-function core:LeaveChannel(msg)
-	self.hooks[SlashCmdList].LEAVE(msg);
-	
-	local number = gsub(msg, "%s*([^%s]+).*", "%1");
-	local _,name = GetChannelName(number);
-	
-	ChatSaverDB[name] = nil;
 end
 
 function core:ToggleChatChannel(checked,channel)
