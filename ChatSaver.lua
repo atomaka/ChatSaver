@@ -33,7 +33,14 @@ function core:RejoinChannels(...)
 		currentChannels[select(i,GetChannelList())] = true
 	end
 	
+	local sortedChannels = {};
 	for channel,_ in pairs(ChatSaverDB) do
+		table.insert(sortedChannels,channel);
+	end
+	
+	table.sort(sortedChannels,function(a,b) return ChatSaverDB[a].index < ChatSaverDB[b].index end);
+	
+	for _,channel in pairs(sortedChannels) do
 		if(currentChannels[channel] == nil) then
 			JoinPermanentChannel(channel); -- does not place in chat frame properly
 			for index,_ in pairs(ChatSaverDB[channel].frames) do
@@ -85,7 +92,7 @@ function core:LeaveChannel(msg)
 	local number = gsub(msg, "%s*([^%s]+).*", "%1");
 	local _,name = GetChannelName(number);
 	
-	ChatSaverDB[name] = nil;
+	--ChatSaverDB[name] = nil;
 end
 
 function core:ToggleChatChannel(checked,channel)
