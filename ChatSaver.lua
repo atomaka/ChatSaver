@@ -16,7 +16,6 @@ function core:OnEnable()
 	self:Hook('ToggleChatChannel','ToggleChatChannel',true);
 	
 	self:RegisterEvent('CHANNEL_UI_UPDATE','RejoinChannels');
-	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','ProcessChannelChanges');
 end
 
 function core:SlashCommand()
@@ -24,7 +23,9 @@ function core:SlashCommand()
 end
 
 function core:RejoinChannels(...)
+	print('RejoinChannels');
 	if(core.firstrun) then
+		print('setup cat server');
 		core:SetupChatSaver();
 	end
 	
@@ -33,7 +34,14 @@ function core:RejoinChannels(...)
 		currentChannels[select(i,GetChannelList())] = true
 	end
 	
+	local sortedChannels = {};
 	for channel,_ in pairs(ChatSaverDB) do
+		table.insert(sortedChannels,channel);
+	end
+	
+	table.sort(sortedChannels, function(a,b) return ChatSaverDB[a].index < ChatSaverDB[b].index end);
+	
+	for _,channel in pairs(sortedChannels) do
 		if(currentChannels[channel] == nil) then
 			JoinPermanentChannel(channel); -- does not place in chat frame properly
 			for index,_ in pairs(ChatSaverDB[channel].frames) do
@@ -43,9 +51,11 @@ function core:RejoinChannels(...)
 	end
 	
 	self:UnregisterEvent('CHANNEL_UI_UPDATE');
+	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','ProcessChannelChanges');
 end
 
 function core:SetupChatSaver()
+	print('SetupChatSaver()');
 	for frame = 1,NUM_CHAT_WINDOWS do 
 		local chatWindowChannels = { GetChatWindowChannels(frame) };
 		for i = 1,#chatWindowChannels,2 do
@@ -65,27 +75,30 @@ function core:SetupChatSaver()
 end
 
 function core:ProcessChannelChanges(_,message,_,_,_,_,_,_,index,name,...)
+	print('ProcessChannelChanges()');
+	--no.  on rejoins and change stored frames
 	if(message == 'YOU_JOINED') then
 		local zone = 1;
 		for frame = 1,NUM_CHAT_WINDOWS do 
 			local chatWindowChannels = { GetChatWindowChannels(frame) };
 			for i = 1,#chatWindowChannels,2 do
 				if(chatWindowChannels[i] == name) then
-					print(chatWindowChannels[i],chatWindowChannels[i + 1]);
 					zone = chatWindowChannels[i + 1];
 					break;
-				end				
+				end
 			end
 		end
 
 		if(zone == 0) then
+			print('Saving channel ',name);
 			ChatSaverDB[name] = {};
 			ChatSaverDB[name]['frames'] = {};
 			ChatSaverDB[name]['index'] = index;
 			ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
 		end
 	elseif(message == 'YOU_LEFT') then
-		ChatSaverDB[name] = nil;
+		print('Removing channel ',name);
+		--ChatSaverDB[name] = nil;
 	end
 end
 
