@@ -56,7 +56,7 @@ function core:SetupChatSaver(...)
 	for frame = 1,NUM_CHAT_WINDOWS do 
 		local chatWindowChannels = { GetChatWindowChannels(frame) };
 		for i = 1,#chatWindowChannels,2 do
-			local name,zone = chatWindowChannels[i], chatWindowChannels[i + 1];
+			local name,zone = chatWindowChannels[i],chatWindowChannels[i + 1];
 			
 			if(zone == 0) then
 				if(ChatSaverDB[name] == nil) then
@@ -77,11 +77,20 @@ function core:JoinChannel(msg)
 	self.hooks[SlashCmdList].JOIN(msg);
 	
 	local name = gsub(msg, "%s*([^%s]+).*", "%1");
+	
+	if(strlen(name) == 0 or not string.match(name,"%a+")) then
+		return;
+	end
+	
+	local index = GetChannelName(name); -- in game function does not handle "General" or "Trade"
+	
+	local _,_,_,_,_,_,category,_,_ = GetChannelDisplayInfo(index);
+	print(category);
 
-	if(strlen(name) > 0 and string.match(name,"%a+")) then
+	if(category == CHANNEL_CATEGORY_CUSTOM) then	
 		ChatSaverDB[name] = {};
 		ChatSaverDB[name]['frames'] = {};
-		ChatSaverDB[name]['index'] = GetChannelName(name);
+		ChatSaverDB[name]['index'] = index;
 		ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
 	end
 end
