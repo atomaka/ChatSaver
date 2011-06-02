@@ -92,7 +92,7 @@ function core:LeaveChannel(msg)
 	local number = gsub(msg, "%s*([^%s]+).*", "%1");
 	local _,name = GetChannelName(number);
 	
-	--ChatSaverDB[name] = nil;
+	ChatSaverDB[name] = nil;
 end
 
 function core:ToggleChatChannel(checked,channel)
