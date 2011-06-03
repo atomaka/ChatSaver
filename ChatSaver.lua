@@ -73,6 +73,27 @@ function core:SetupChatSaver(...)
 	self:UnregisterEvent('CHAT_MSG_CHANNEL_NOTICE');
 end
 
+function core:GetChannelInfo(id)
+	--addon.lua:373
+	--channelapi.lua:65
+	--channelapi.lua:55
+	local channelTable = core:GetChanneltable();
+end
+
+function core:GetChannelTable()
+	local channelList = { GetChannelList() };
+	local channelTable = {};
+	for i = 1,#channelList,2 do
+		channelTable[channelList[i]] = channelList[i + 1];
+		channelTable[channelList[i + 1]] = channelList[i];
+		if(type(channelList[i + 1]) == 'string') then
+			channelTable[channelList[i + 1]:lower()] = channelList[i];
+		end
+	end
+	
+	return channelTable;
+end
+
 function core:JoinChannel(msg)
 	self.hooks[SlashCmdList].JOIN(msg);
 	
