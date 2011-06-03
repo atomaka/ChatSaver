@@ -27,6 +27,50 @@ function core:SlashCommand()
 	core:RejoinChannels();
 end
 
+--[[ 
+--	CHANNEL FUNCTIONS 
+--	Because GetChannelName() and GetChannelDisplayInfo() are less
+--  than good.	
+]] --
+
+function core:GetChannelInfo(id)
+	local channelNumber,channelName = GetChannelName(id);
+	local channelTable = core:GetChannelTable();
+	
+	if(channelName == nil) then
+		channelName = channelTable[channelName];
+	end
+	
+	return channelNumber,channelName,core:GetChannelCategory(channelNumber);
+end
+
+function core:GetChannelTable()
+	local channelList = { GetChannelList() };
+	local channelTable = {};
+	for i = 1,#channelList,2 do
+		channelTable[channelList[i]] = channelList[i + 1];
+		channelTable[channelList[i + 1]] = channelList[i];
+		if(type(channelList[i + 1]) == 'string') then
+			channelTable[channelList[i + 1]:lower()] = channelList[i];
+		end
+	end
+
+	return channelTable;
+end
+
+function core:GetChannelCategory(number)
+	for i = 1,GetNumDisplayChannels(),1 do
+		_,_,_,channelNumber,_,_,category = GetChannelDisplayInfo(i);
+		print(channelNumber,category);
+		
+		if(channelNumber == number) then
+			return category;
+		end
+	end
+end
+
+--[[ EVENT FUNCTIONS ]] --
+
 function core:RejoinChannels(...)
 	local currentChannels = {};
 	for i = 1,select('#',GetChannelList()) do
@@ -73,58 +117,28 @@ function core:SetupChatSaver(...)
 	self:UnregisterEvent('CHAT_MSG_CHANNEL_NOTICE');
 end
 
-function core:GetChannelInfo(id)
-	local channelNumber,channelName = GetChannelName(id);
-	local channelTable = core:GetChannelTable();
+function core:StoreChannel(_,_,_,_,_,_,_,_,_,name)
+	number,channelName,category = core:GetChannelInfo(name);
 	
-	if(channelName == nil) then
-		channelName = channelTable[channelName];
+	if(category == 'CHANNEL_CATEGORY_CUSTOM') then	
+		ChatSaverDB[name] = {};
+		ChatSaverDB[name]['frames'] = {};
+		ChatSaverDB[name]['index'] = number;
+		ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
 	end
 	
-	return channelNumber,channelName,core:GetChannelCategory(channelNumber);
+	self:UnregisterEvent('CHAT_MSG_CHANNEL_NOTICE');
 end
 
-function core:GetChannelTable()
-	local channelList = { GetChannelList() };
-	local channelTable = {};
-	for i = 1,#channelList,2 do
-		channelTable[channelList[i]] = channelList[i + 1];
-		channelTable[channelList[i + 1]] = channelList[i];
-		if(type(channelList[i + 1]) == 'string') then
-			channelTable[channelList[i + 1]:lower()] = channelList[i];
-		end
-	end
-
-	return channelTable;
-end
-
-function core:GetChannelCategory(number)
-	for i = 1,GetNumDisplayChannels(),1 do
-		_,_,channelNumber,_,_,category = GetChannelDisplayInfo(i);
-		
-		if(channelNumber == number) then
-			return category;
-		end
-	end
-end
+--[[ HOOKED FUNCTIONS ]] --
 
 function core:JoinChannel(msg)
 	self.hooks[SlashCmdList].JOIN(msg);
 	
 	local name = gsub(msg, "%s*([^%s]+).*", "%1");
 	
-	if(strlen(name) == 0 or not string.match(name,"%a+")) then
-		return;
-	end
-	
-	number,channelName,category = core:GetChannelInfo(name);
-	print(number,channelName,category);
-	
-	if(category == CHANNEL_CATEGORY_CUSTOM) then	
-		ChatSaverDB[name] = {};
-		ChatSaverDB[name]['frames'] = {};
-		ChatSaverDB[name]['index'] = index;
-		ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
+	if(strlen(name) > 0 and string.match(name,"%a+")) then
+		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','StoreChannel');
 	end
 end
 
