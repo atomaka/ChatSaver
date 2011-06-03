@@ -99,7 +99,7 @@ function core:GetChannelTable()
 end
 
 function core:GetChannelCategory(number)
-	for i = 1,GetNumDisplayChannels(),i do
+	for i = 1,GetNumDisplayChannels(),1 do
 		_,_,channelNumber,_,_,category = GetChannelDisplayInfo(i);
 		
 		if(channelNumber == number) then
@@ -117,11 +117,9 @@ function core:JoinChannel(msg)
 		return;
 	end
 	
-	local index = GetChannelName(name); -- in game function does not handle "General" or "Trade"
+	number,channelName,category = core:GetChannelInfo(name);
+	print(number,channelName,category);
 	
-	local _,_,_,_,_,_,category,_,_ = GetChannelDisplayInfo(index);
-	print(category);
-
 	if(category == CHANNEL_CATEGORY_CUSTOM) then	
 		ChatSaverDB[name] = {};
 		ChatSaverDB[name]['frames'] = {};
