@@ -64,7 +64,7 @@ end
 
 function core:GetChannelCategory(number)
 	for i = 1,GetNumDisplayChannels(),1 do
-		_,_,_,channelNumber,_,_,category = GetChannelDisplayInfo(i);
+		local _,_,_,channelNumber,_,_,category = GetChannelDisplayInfo(i);
 		
 		if(channelNumber == number) then
 			return category;
@@ -84,7 +84,6 @@ function core:RejoinChannels(...)
 	for channel,_ in pairs(ChatSaverDB) do
 		table.insert(sortedChannels,channel);
 	end
-	
 	table.sort(sortedChannels,function(a,b) return ChatSaverDB[a].index < ChatSaverDB[b].index end);
 	
 	for _,channel in pairs(sortedChannels) do
