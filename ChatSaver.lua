@@ -74,10 +74,14 @@ function core:SetupChatSaver(...)
 end
 
 function core:GetChannelInfo(id)
-	--addon.lua:373
-	--channelapi.lua:65
-	--channelapi.lua:55
-	local channelTable = core:GetChanneltable();
+	local channelNumber,channelName = GetChannelName(id);
+	local channelTable = core:GetChannelTable();
+	
+	if(channelName == nil) then
+		channelName = channelTable[channelName];
+	end
+	
+	return channelNumber,channelName,core:GetChannelCategory(channelNumber);
 end
 
 function core:GetChannelTable()
@@ -90,8 +94,18 @@ function core:GetChannelTable()
 			channelTable[channelList[i + 1]:lower()] = channelList[i];
 		end
 	end
-	
+
 	return channelTable;
+end
+
+function core:GetChannelCategory(number)
+	for i = 1,GetNumDisplayChannels(),i do
+		_,_,channelNumber,_,_,category = GetChannelDisplayInfo(i);
+		
+		if(channelNumber == number) then
+			return category;
+		end
+	end
 end
 
 function core:JoinChannel(msg)
