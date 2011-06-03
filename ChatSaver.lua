@@ -148,9 +148,11 @@ function core:LeaveChannel(msg)
 	self.hooks[SlashCmdList].LEAVE(msg);
 	
 	local id = gsub(msg,"%s*([^%s]+).*","%1");
-	local _,name = core:GetChannelInfo(id);
 	
-	ChatSaverDB[name] = nil;
+	if(strlen(id) > 0) then
+		local _,name = core:GetChannelInfo(id);
+		ChatSaverDB[name] = nil;
+	end
 end
 
 function core:ToggleChatChannel(checked,channel)
