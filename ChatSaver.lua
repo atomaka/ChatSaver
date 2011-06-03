@@ -36,9 +36,13 @@ end
 function core:GetChannelInfo(id)
 	local channelNumber,channelName = GetChannelName(id);
 	local channelTable = core:GetChannelTable();
-	
+
 	if(channelName == nil) then
-		channelName = channelTable[channelName];
+		id = channelTable[id];
+		
+		if(id ~= nil) then
+			channelNumber,channelName = GetChannelName(id);
+		end
 	end
 	
 	return channelNumber,channelName,core:GetChannelCategory(channelNumber);
@@ -61,7 +65,6 @@ end
 function core:GetChannelCategory(number)
 	for i = 1,GetNumDisplayChannels(),1 do
 		_,_,_,channelNumber,_,_,category = GetChannelDisplayInfo(i);
-		print(channelNumber,category);
 		
 		if(channelNumber == number) then
 			return category;
@@ -100,13 +103,13 @@ function core:SetupChatSaver(...)
 	for frame = 1,NUM_CHAT_WINDOWS do 
 		local chatWindowChannels = { GetChatWindowChannels(frame) };
 		for i = 1,#chatWindowChannels,2 do
-			local name,zone = chatWindowChannels[i],chatWindowChannels[i + 1];
-			
-			if(zone == 0) then
+			local number,name,category = core:GetChannelInfo(chatWindowChannels[i]);
+
+			if(category == 'CHANNEL_CATEGORY_CUSTOM') then
 				if(ChatSaverDB[name] == nil) then
 					ChatSaverDB[name] = {};
 					ChatSaverDB[name]['frames'] = {};
-					ChatSaverDB[name]['index'] = GetChannelName(name);
+					ChatSaverDB[name]['index'] = number;
 				end
 			
 				ChatSaverDB[name]['frames'][frame] = true;
@@ -118,7 +121,7 @@ function core:SetupChatSaver(...)
 end
 
 function core:StoreChannel(_,_,_,_,_,_,_,_,_,name)
-	number,channelName,category = core:GetChannelInfo(name);
+	local number,channelName,category = core:GetChannelInfo(name);
 	
 	if(category == 'CHANNEL_CATEGORY_CUSTOM') then	
 		ChatSaverDB[name] = {};
@@ -135,7 +138,7 @@ end
 function core:JoinChannel(msg)
 	self.hooks[SlashCmdList].JOIN(msg);
 	
-	local name = gsub(msg, "%s*([^%s]+).*", "%1");
+	local name = gsub(msg,"%s*([^%s]+).*","%1");
 	
 	if(strlen(name) > 0 and string.match(name,"%a+")) then
 		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','StoreChannel');
@@ -145,8 +148,8 @@ end
 function core:LeaveChannel(msg)
 	self.hooks[SlashCmdList].LEAVE(msg);
 	
-	local number = gsub(msg, "%s*([^%s]+).*", "%1");
-	local _,name = GetChannelName(number);
+	local id = gsub(msg,"%s*([^%s]+).*","%1");
+	local _,name = core:GetChannelInfo(id);
 	
 	ChatSaverDB[name] = nil;
 end
