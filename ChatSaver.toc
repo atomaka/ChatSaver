@@ -1,4 +1,4 @@
-## Interface: 40100
+## Interface: 42000
 ## Title: ChatSaver
 ## Version: @project-version@
 ## Author: Gaffer
