@@ -14,9 +14,10 @@ function core:OnEnable()
 	self:Hook('ToggleChatChannel','ToggleChatChannel',true)
 	
 	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','ProcessChannelChange')
-	self:RegisterEvent('PLAYER_ALIVE','RejoinChannels')
 	if core.firstrun then
 		self:RegisterEvent('CHANNEL_UI_UPDATE','SetupChatSaver')
+	else
+		self:RegisterEvent('CHANNEL_UI_UPDATE','RejoinChannels')
 	end
 end
 
@@ -78,7 +79,7 @@ function core:ProcessChannelChange(_,message,_,_,_,_,_,_,index,name)
 			ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true
 		end
 	elseif message == 'YOU_LEFT' then
-		ChatSaverDB[name] = nil
+		--ChatSaverDB[name] = nil
 	end
 end
 
