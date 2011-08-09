@@ -14,6 +14,7 @@ function core:OnEnable()
 	self:Hook('ToggleChatChannel','ToggleChatChannel',true)
 	
 	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','ProcessChannelChange')
+	self:RegisterEvent('PLAYER_ALIVE','RejoinChannels')
 	if core.firstrun then
 		self:RegisterEvent('CHANNEL_UI_UPDATE','SetupChatSaver')
 	end
