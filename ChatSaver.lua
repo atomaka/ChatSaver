@@ -13,13 +13,11 @@ function core:OnInitialize()
 end
 
 function core:OnEnable()
-	self:RawHook(SlashCmdList,'JOIN','JoinChannel',true);
-	self:RawHook(SlashCmdList,'LEAVE','LeaveChannel',true);
 	self:Hook('ToggleChatChannel','ToggleChatChannel',true);
 	
-	self:RegisterEvent('CHANNEL_UI_UPDATE','RejoinChannels');
+	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','ProcessChannelChange');
 	if(core.firstrun) then
-		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','SetupChatSaver');
+		--self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','SetupChatSaver');
 	end
 end
 
@@ -73,6 +71,21 @@ function core:GetChannelCategory(number)
 end
 
 --[[ EVENT FUNCTIONS ]] --
+
+function ProcessChannelChange(_,message,_,_,_,_,_,_,index,name)
+	if message == 'YOU_JOINED' then
+		local number,_,category = core:GetChannelInfo(name)
+		
+		if category == 'CHANNEL_CATEGORY_CUSTOM' then
+			ChatSaverDB[name] = {};
+			ChatSaverDB[name]['frames'] = {};
+			ChatSaverDB[name]['index'] = number;
+			ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
+		end
+	elseif message == 'YOU_LEFT' then
+		ChatSaverDB[name] = nil
+	end
+end
 
 function core:RejoinChannels(...)
 	local currentChannels = {};
