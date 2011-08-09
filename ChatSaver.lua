@@ -46,7 +46,7 @@ function core:GetChannelTable()
 	for i = 1,#channelList,2 do
 		channelTable[channelList[i]] = channelList[i + 1];
 		channelTable[channelList[i + 1]] = channelList[i];
-		if(type(channelList[i + 1]) == 'string') then
+		if type(channelList[i + 1]) == 'string' then
 			channelTable[channelList[i + 1]:lower()] = channelList[i];
 		end
 	end
@@ -94,7 +94,7 @@ function core:RejoinChannels(...)
 	table.sort(sortedChannels,function(a,b) return ChatSaverDB[a].index < ChatSaverDB[b].index end);
 	
 	for _,channel in pairs(sortedChannels) do
-		if(currentChannels[channel] == nil) then
+		if currentChannels[channel] == nil then
 			JoinPermanentChannel(channel); -- does not place in chat frame properly
 			for index,_ in pairs(ChatSaverDB[channel].frames) do
 				ChatFrame_AddChannel(_G['ChatFrame'..index],channel);
@@ -111,8 +111,8 @@ function core:SetupChatSaver(...)
 		for i = 1,#chatWindowChannels,2 do
 			local number,name,category = core:GetChannelInfo(chatWindowChannels[i]);
 
-			if(category == 'CHANNEL_CATEGORY_CUSTOM') then
-				if(ChatSaverDB[name] == nil) then
+			if category == 'CHANNEL_CATEGORY_CUSTOM' then
+				if ChatSaverDB[name] == nil then
 					ChatSaverDB[name] = {};
 					ChatSaverDB[name]['frames'] = {};
 					ChatSaverDB[name]['index'] = number;
@@ -129,7 +129,7 @@ end
 function core:StoreChannel(_,_,_,_,_,_,_,_,_,name)
 	local number,channelName,category = core:GetChannelInfo(name);
 	
-	if(category == 'CHANNEL_CATEGORY_CUSTOM') then	
+	if category == 'CHANNEL_CATEGORY_CUSTOM' then	
 		ChatSaverDB[name] = {};
 		ChatSaverDB[name]['frames'] = {};
 		ChatSaverDB[name]['index'] = number;
@@ -141,33 +141,12 @@ end
 
 --[[ HOOKED FUNCTIONS ]] --
 
-function core:JoinChannel(msg)
-	self.hooks[SlashCmdList].JOIN(msg);
-	
-	local name = gsub(msg,"%s*([^%s]+).*","%1");
-	
-	if(strlen(name) > 0 and string.match(name,"%a+")) then
-		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','StoreChannel');
-	end
-end
-
-function core:LeaveChannel(msg)
-	self.hooks[SlashCmdList].LEAVE(msg);
-	
-	local id = gsub(msg,"%s*([^%s]+).*","%1");
-	
-	if(strlen(id) > 0) then
-		local _,name = core:GetChannelInfo(id);
-		ChatSaverDB[name] = nil;
-	end
-end
-
 function core:ToggleChatChannel(checked,channel)
-	if(ChatSaverDB[channel] == nil) then 
+	if ChatSaverDB[channel] == nil then 
 		return;
 	end
 	
-	if(checked) then
+	if checked then
 		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = true;
 	else
 		ChatSaverDB[channel]['frames'][FCF_GetCurrentChatFrameID()] = nil;
