@@ -2,8 +2,6 @@ ChatSaver = LibStub('AceAddon-3.0'):NewAddon('ChatSaver','AceConsole-3.0','AceHo
 local core = ChatSaver;
 
 function core:OnInitialize()	
-	self:RegisterChatCommand('cs','SlashCommand');
-	
 	if(ChatSaverDB == nil) then 
 		core.firstrun = true;
 		ChatSaverDB = {}; 
@@ -21,10 +19,6 @@ function core:OnEnable()
 	if(core.firstrun) then
 		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','SetupChatSaver');
 	end
-end
-
-function core:SlashCommand()
-	core:RejoinChannels();
 end
 
 --[[ 
