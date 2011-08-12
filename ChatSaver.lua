@@ -67,18 +67,20 @@ end
 --[[ EVENT FUNCTIONS ]] --
 
 function core:ProcessChannelChange(_,message,_,_,_,_,_,_,index,name)
-        if message == 'YOU_JOINED' then
-                local number,_,category = core:GetChannelInfo(name)
+	if message == 'YOU_JOINED' then
+		local number,_,category = core:GetChannelInfo(name)
                 
-                if category == 'CHANNEL_CATEGORY_CUSTOM' then
-                        ChatSaverDB[name] = {}
-                        ChatSaverDB[name]['frames'] = {}
-                        ChatSaverDB[name]['index'] = number
-                        ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true
-                end
-        elseif message == 'YOU_LEFT' then
-                ChatSaverDB[name] = nil
-        end
+		if category == 'CHANNEL_CATEGORY_CUSTOM' then
+			if ChatSaverDB[name] == nil then
+				ChatSaverDB[name] = {}
+				ChatSaverDB[name]['frames'] = {}
+				ChatSaverDB[name]['index'] = number
+				ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true
+			end
+		end
+	elseif message == 'YOU_LEFT' then
+		ChatSaverDB[name] = nil
+	end
 end
 
 function core:RejoinChannels(...)
@@ -128,41 +130,7 @@ function core:SetupChatSaver(...)
 	self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','ProcessChannelChange')
 end
 
-function core:StoreChannel(_,_,_,_,_,_,_,_,_,name)
-	local number,channelName,category = core:GetChannelInfo(name);
-	
-	if(category == 'CHANNEL_CATEGORY_CUSTOM') then	
-		ChatSaverDB[name] = {};
-		ChatSaverDB[name]['frames'] = {};
-		ChatSaverDB[name]['index'] = number;
-		ChatSaverDB[name]['frames'][DEFAULT_CHAT_FRAME:GetID()] = true;
-	end
-	
-	self:UnregisterEvent('CHAT_MSG_CHANNEL_NOTICE');
-end
-
 --[[ HOOKED FUNCTIONS ]] --
-
-function core:JoinChannel(msg)
-	self.hooks[SlashCmdList].JOIN(msg);
-	
-	local name = gsub(msg,"%s*([^%s]+).*","%1");
-	
-	if(strlen(name) > 0 and string.match(name,"%a+")) then
-		self:RegisterEvent('CHAT_MSG_CHANNEL_NOTICE','StoreChannel');
-	end
-end
-
-function core:LeaveChannel(msg)
-	self.hooks[SlashCmdList].LEAVE(msg);
-	
-	local id = gsub(msg,"%s*([^%s]+).*","%1");
-	
-	if(strlen(id) > 0) then
-		local _,name = core:GetChannelInfo(id);
-		ChatSaverDB[name] = nil;
-	end
-end
 
 function core:ToggleChatChannel(checked,channel)
 	if(ChatSaverDB[channel] == nil) then 
